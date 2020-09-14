@@ -1,7 +1,7 @@
 {
   "name": "secretdev.js",
   "version": "1.0.0-dev",
-  "description": "Secret Development api Wrapper",
+  "description": "Simple Api Wrapper  for Secret Development with Bot List, and language on JavaScript",
   "main": "index",
   "scripts": {
     "test": "eslint --ignore-path .gitignore \"src/**/*.+(js)\"",
