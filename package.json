@@ -1,0 +1,42 @@
+{
+  "name": "secretdev.js",
+  "version": "1.0.0-dev",
+  "description": "Secret Development api Wrapper",
+  "main": "index",
+  "scripts": {
+    "test": "eslint --ignore-path .gitignore \"src/**/*.+(js)\"",
+    "test:fix": "eslint --ignore-path .gitignore \"src/**/*.+(js)\" --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/secretDevelopment17/secretdev.js.git"
+  },
+  "keywords": [
+    "JavaScript",
+    "SecretDev",
+    "Wrapper",
+    "Api",
+    "Rest-Api",
+    "Application"
+  ],
+  "author": "fabio0107id",
+  "license": "AGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/secretDevelopment17/secretdev.js/issues"
+  },
+  "homepage": "https://github.com/secretDevelopment17/secretdev.js#readme",
+  "browser": {
+    "discord.js": false,
+    "discord.js-light": false,
+    "Eris": false
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "dependencies": {
+    "node-superfetch": "^0.1.10"
+  },
+  "devDependencies": {
+    "eslint": "^7.7.0"
+  }
+}

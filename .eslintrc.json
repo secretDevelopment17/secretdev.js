@@ -1,0 +1,25 @@
+{
+  "extends": "eslint:recommended",
+  "env": {
+    "node": true,
+    "es6": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2017,
+    "ecmaFeatures": []
+  },
+  "rules": {
+    "no-console": 0,
+    "no-process-env": 0,
+    "no-unused-vars": 0,
+    "semi": "warn",
+    "no-undef": "error",
+    "no-redeclare": "off",
+    "no-extra-semi": "warn",
+    "no-new": "error",
+    "no-mixed-spaces-and-tabs": "off",
+    "prefer-arrow-callback": "warn",
+    "prefer-const": "warn",
+    "prefer-template": "error"
+  }
+}
