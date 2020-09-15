@@ -53,7 +53,7 @@ class SecretDevClient extends EventEmitter {
 	/**
 	 * Get information about a bot with jsons.
 	 * @param {String} id This ID of the bot you want to get the informations
-	 * @returns {Promise<object>}
+	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
@@ -77,10 +77,10 @@ class SecretDevClient extends EventEmitter {
 
 	/**
 	 * Get Array in object find the api
-	 * @param {Object} [obj] this a when object the find
+	 * @param {Object} obj this a when object the find
 	 * @param {?String} [obj.ownerID] this a when object with owner developer
 	 * @param {?String} [obj.prefix] this a when object with same the prefix many bots.
-	 * @returns {Promise<object>}
+	 * @return {Promise<object>}
 	 */
 	async botsArray(obj) {
 		const blockedTypeof = ["number", "string", "boolean"];
@@ -165,7 +165,7 @@ class SecretDevClient extends EventEmitter {
 	/**
    * Get fetchUser api with discord api of client
    * @param {String} id This ID of users on discord ID
-   * @returns {Promise<object>}
+   * @return {Promise<object>}
 	 */
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
