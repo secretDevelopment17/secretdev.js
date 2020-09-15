@@ -53,30 +53,119 @@ class SecretDevClient extends EventEmitter {
 	/**
 	 * Get information about a bot with jsons.
 	 * @param {String} id This ID of the bot you want to get the informations
-	 * @returns {Promise<Object>}
+	 * @returns {Promise<object>}
 	 */
 	async getBot(id) {
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
 		if (!id || isNaN(id)) id = this.client.user.id;
 
-		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
+		const { body } = await request.get(`https://api.secretdev.tech/api/bots`);
 
-		if (body.error === "not_found") return {
+		const botObject = body[id];
+
+		if (botObject === undefined) return {
 			error: { message: "This Bot is Not Found", code: 404 }
 		};
 
 		return {
-			botID: body.botID,
-			ownerID: body.ownerID,
-			prefix: body.prefix,
-			approve: body.approve
+			botID: botObject.botID,
+			ownerID: botObject.ownerID,
+			prefix: botObject.prefix,
+			approve: botObject.approve
 		};
+	}
+
+	/**
+	 * Get Array in object find the api
+	 * @param {Object} [obj] this a when object the find
+	 * @param {?String} [obj.ownerID] this a when object with owner developer
+	 * @param {?String} [obj.prefix] this a when object with same the prefix many bots.
+	 * @returns {Promise<object>}
+	 */
+	async botsArray(obj) {
+		const blockedTypeof = ["number", "string", "boolean"];
+
+		if (blockedTypeof.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
+
+		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
+
+		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
+			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
+			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
+
+			const botsArray = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
+
+			if (!botsArray.length) return {
+				error: { message: "This bots array is not found.", code: 404 }
+			};
+
+			const bots = [];
+
+			for (const bot of botsArray) {
+				const getBots = {
+					botID: bot.botID,
+					ownerID: bot.ownerID,
+					prefix: bot.prefix,
+					approve: bot.approve
+				};
+
+				bots.push(getBots);
+			}
+
+			return bots;
+		} else if (obj.ownerID !== undefined) {
+			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
+
+			const botsArray = body.filter(x => x.ownerID.includes(obj.ownerID));
+
+			if (!botsArray.length) return {
+				error: { message: "This bots array is not found.", code: 404 }
+			};
+
+			const bots = [];
+
+			for (const bot of botsArray) {
+				const getBots = {
+					botID: bot.botID,
+					ownerID: bot.ownerID,
+					prefix: bot.prefix,
+					approve: bot.approve
+				};
+
+				bots.push(getBots);
+			}
+
+			return bots;
+		} else {
+			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
+
+			const botsArray = body.filter(x => x.prefix.includes(obj.prefix));
+
+			if (!botsArray.length) return {
+				error: { message: "This bots array is not found.", code: 404 }
+			};
+
+			const bots = [];
+
+			for (const bot of botsArray) {
+				const getBots = {
+					botID: bot.botID,
+					ownerID: bot.ownerID,
+					prefix: bot.prefix,
+					approve: bot.approve
+				};
+
+				bots.push(getBots);
+			}
+
+			return bots;
+		}
 	}
 
 	/**
    * Get fetchUser api with discord api of client
    * @param {String} id This ID of users on discord ID
-   * @return {Promise<Object>}
+   * @returns {Promise<object>}
 	 */
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
@@ -140,11 +229,11 @@ module.exports = SecretDevClient;
 async function authorizeClient(client) {
 	const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
-	const result = body.filter(x => x.botID === client.user.id)[0];
+	const result = body.filter(x => x.botID.includes(client.user.id))[0];
 
 	if (!result) return { error: { code: 404 } };
 
-	const botOwn = body.filter(x => x.ownerID === result.ownerID);
+	const botOwn = body.filter(x => x.ownerID.includes(result.ownerID));
 
 	const bots = [];
 
@@ -157,7 +246,7 @@ async function authorizeClient(client) {
 			const botFetch = await client.fetchUser(bot.botID);
 
 			bots.push(botFetch.id);
-		} else throw new Error("This library for register is not yet a supported.");
+		} else throw new Error("This library for authorize client is not yet a supported.");
 	}
 
 	if (!bots.includes(client.user.id)) return { error: { code: 403 } };
