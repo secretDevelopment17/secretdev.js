@@ -32,20 +32,16 @@ class SecretDevClient extends EventEmitter {
 		 */
 
 		client.on("ready", () => {
-			authorizeClient(client).then(x => {
-				if (x.error !== undefined && x.error.code == 404) return this.emit("unAuthorize", {
-					message: "This client is not Registered yet on Secret Development.",
-					code: x.error.code
-				});
-				else if (x.error !== undefined && x.error.code == 403) return this.emit("unAuthorize", {
-					message: "This client is now Forbidden or Un-Authorize.",
-					code: x.error.code
-				});
+			authorizeClient(client).then(authorize => {
+				if (authorize.notFound !== undefined && authorize.notFound.code == 404) throw new Error(
+					"This client is not Registered yet on Secret Development."
+				);
+				
+				if (authorize.unAuthorize !== undefined && authorize.unAuthorize.code == 401) throw new Error(
+					"This client is now Un-Authorize please change the client packages."
+				);
 
-				this.emit("authorize", {
-					message: "This client has been authorize and connected to the Api Wrapper.",
-					code: x.authorize.code
-				});
+				this.emit("authorize", authorize);
 			});
 		});
 	}
@@ -231,7 +227,7 @@ async function authorizeClient(client) {
 
 	const result = body.filter(x => x.botID.includes(client.user.id))[0];
 
-	if (!result) return { error: { code: 404 } };
+	if (!result) return { notFound: { code: 404 } };
 
 	const botOwn = body.filter(x => x.ownerID.includes(result.ownerID));
 
@@ -249,7 +245,12 @@ async function authorizeClient(client) {
 		} else throw new Error("This library for authorize client is not yet a supported.");
 	}
 
-	if (!bots.includes(client.user.id)) return { error: { code: 403 } };
+	if (!bots.includes(client.user.id)) return { unAuthorize: { code: 401 } };
 
-	return { authorize: { code: 201 } };
+	return {
+		botID: result.botID,
+		ownerID: result.ownerID,
+		prefix: result.prefix,
+		approve: result.approve
+	};
 }
