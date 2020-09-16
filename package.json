@@ -1,6 +1,6 @@
 {
   "name": "secretdev.js",
-  "version": "1.0.2-dev",
+  "version": "1.0.3-dev",
   "description": "Simple Api Wrapper  for Secret Development with Bot List, and language on JavaScript",
   "main": "index",
   "scripts": {
@@ -34,7 +34,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "https": "^1.0.0"
+    "node-superfetch": "^0.1.10"
   },
   "devDependencies": {
     "eslint": "^7.7.0"
