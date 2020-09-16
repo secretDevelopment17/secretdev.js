@@ -1,7 +1,8 @@
 "use strict";
 
-const request = require("node-superfetch");
 const EventEmitter = require("events");
+const https = require("https");
+const qs = require("querystring");
 
 class SecretDevClient extends EventEmitter {
 	/**
@@ -20,55 +21,121 @@ class SecretDevClient extends EventEmitter {
 		/**
 		 * Event that fires when has been authorize is successful to load
 		 * @event authorize
-		 * @param {message} this message send a Authorize
-		 * @param {code} this code send for Authorize
+		 * @param {Object} authClient Object bots was authorize
 		 */
 
 		/**
-		 * Event to notify for authorize is fail to load
-		 * @event unAuthorize
-		 * @param {message} this message send a un-Authorize
-		 * @param {code} this code send for un-Authorize
+		 * Event that fires when authorize is fail to load
+		 * @event error
+		 * @param {NodeJS.Error} e This audit log for fail the load
 		 */
 
-		client.on("ready", () => {
-			authorizeClient(client).then(authorize => {
-				if (authorize.notFound !== undefined && authorize.notFound.code == 404) throw new Error(
-					"This client is not Registered yet on Secret Development."
-				);
-				
-				if (authorize.unAuthorize !== undefined && authorize.unAuthorize.code == 401) throw new Error(
-					"This client is now Un-Authorize please change the client packages."
-				);
+		client.on("ready", async () => {
+			try {
+				const authClient = await this.authorizeClient();
 
-				this.emit("authorize", authorize);
-			});
+				this.emit("authorize", authClient);
+			} catch (e) {
+				this.emit("error", e);
+			}
 		});
 	}
 
 	/**
+	 * Create the request point
+	 * @param {String} method Https method for to the use api wrapper
+	 * @param {String} endpoint API endpoint for to the use api wrapper
+	 * @param {?Object} [data] Data to send with the requests
+	 * @private
+	 * @return {Promise<object>}
+	 */
+	_request(method, endpoint, data) {
+		return new Promise((resolve, reject) => {
+			const response = {
+				raw: "",
+				body: null,
+				status: null,
+				headers: null
+			};
+
+			const options = {
+				hostname: `api.secretdev.tech`,
+				endpoint: `/api/${endpoint}`,
+				method,
+				headers: {}
+			};
+
+			if (this.client) options.headers.authorizeClient = this.client;
+			else console.error(
+				"[secretdev.js] Warning: No provide someone for client packages."
+			);
+
+			if (data && method === "post") options.headers['content-type'] = "application/json";
+			if (data && method === "get") options.path += `?${qs.encode(data)}`;
+
+			const request = https.request(options, res => {
+				response.status = res.statusCode;
+				response.headers = res.headers;
+				response.ok = res.statusCode >= 200 && res.statusCode < 300;
+
+				res.on("data", chunk => response.raw += chunk);
+
+				res.on("end", () => {
+					response.body = res.headers['content-type'].includes("application/json") ? JSON.parse(response.raw) : response.raw;
+
+					if (response.ok) resolve(response);
+					else {
+						const error = new Error(`${res.statusCode} ${res.statusMessage}`);
+
+						Object.assign(error, response);
+
+						reject(error);
+					}
+				});
+			});
+
+			request.on("error", err => reject(err));
+
+			if (data && method === "post") request.write(JSON.stringify(data));
+
+			request.end();
+		});
+	}
+
+	/**
+	 * Authorization Client with package to connect api Wrapper
+	 * @private
+	 * @return {Promise<object>}
+	 */
+	async authorizeClient() {
+		const { body: res } = await this._request("post", "authorizeClient", this.client);
+
+		return res;
+	}
+
+	/**
 	 * Get information about a bot with jsons.
-	 * @param {String} id This ID of the bot you want to get the informations
+	 * @param {?String} id This ID of the bot you want to get the informations
 	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
 		if (!id || isNaN(id)) id = this.client.user.id;
 
-		const { body } = await request.get(`https://api.secretdev.tech/api/bots`);
+		const { body: bots } = await this._request("get", `bots/${id}`);
 
-		const botObject = body[id];
-
-		if (botObject === undefined) return {
+		if (bots.error === "not_found") return {
 			error: { message: "This Bot is Not Found", code: 404 }
 		};
 
-		return {
-			botID: botObject.botID,
-			ownerID: botObject.ownerID,
-			prefix: botObject.prefix,
-			approve: botObject.approve
+		const result = {
+			botID: bots.botID,
+			ownerID: bots.ownerID,
+			prefix: bots.prefix,
+			approve: bots.approve
 		};
+
+		return result;
 	}
 
 	/**
@@ -78,95 +145,56 @@ class SecretDevClient extends EventEmitter {
 	 * @param {?String} [obj.prefix] this a when object with same the prefix many bots.
 	 * @return {Promise<object>}
 	 */
-	async botsArray(obj) {
+	async botsArray(obj = {}) {
 		const blockedTypeof = ["number", "string", "boolean"];
 
 		if (blockedTypeof.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
 
-		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
+		const { body } = await this._request("get", "botsArray");
 
 		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
 			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
-			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
+			else if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix Bots.");
 
-			const botsArray = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
+			const bots = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
 
-			if (!botsArray.length) return {
+			if (!bots.length) return {
 				error: { message: "This bots array is not found.", code: 404 }
 			};
-
-			const bots = [];
-
-			for (const bot of botsArray) {
-				const getBots = {
-					botID: bot.botID,
-					ownerID: bot.ownerID,
-					prefix: bot.prefix,
-					approve: bot.approve
-				};
-
-				bots.push(getBots);
-			}
 
 			return bots;
 		} else if (obj.ownerID !== undefined) {
 			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
 
-			const botsArray = body.filter(x => x.ownerID.includes(obj.ownerID));
+			const bots = body.filter(x => x.ownerID.includes(obj.ownerID));
 
-			if (!botsArray.length) return {
+			if (!bots.length) return {
 				error: { message: "This bots array is not found.", code: 404 }
 			};
 
-			const bots = [];
-
-			for (const bot of botsArray) {
-				const getBots = {
-					botID: bot.botID,
-					ownerID: bot.ownerID,
-					prefix: bot.prefix,
-					approve: bot.approve
-				};
-
-				bots.push(getBots);
-			}
-
 			return bots;
-		} else {
+		} else if (obj.prefix !== undefined) {
 			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
 
-			const botsArray = body.filter(x => x.prefix.includes(obj.prefix));
+			const bots = body.filter(x => x.prefix.includes(obj.prefix));
 
-			if (!botsArray.length) return {
+			if (!bots.length) return {
 				error: { message: "This bots array is not found.", code: 404 }
 			};
 
-			const bots = [];
-
-			for (const bot of botsArray) {
-				const getBots = {
-					botID: bot.botID,
-					ownerID: bot.ownerID,
-					prefix: bot.prefix,
-					approve: bot.approve
-				};
-
-				bots.push(getBots);
-			}
-
 			return bots;
-		}
+		} else throw new Error("[botsArray] Invalid a Object Structures.");
 	}
 
 	/**
    * Get fetchUser api with discord api of client
-   * @param {String} id This ID of users on discord ID
+   * @param {?String} id This ID of users on discord ID
    * @return {Promise<object>}
 	 */
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
 
-		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
+		const { body: botsArray } = await this._request("get", "botsArray");
 
 		if (this.client.users.fetch !== undefined) {
 			const user = await this.client.users.fetch(id);
@@ -221,36 +249,3 @@ class SecretDevClient extends EventEmitter {
 }
 
 module.exports = SecretDevClient;
-
-async function authorizeClient(client) {
-	const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
-
-	const result = body.filter(x => x.botID.includes(client.user.id))[0];
-
-	if (!result) return { notFound: { code: 404 } };
-
-	const botOwn = body.filter(x => x.ownerID.includes(result.ownerID));
-
-	const bots = [];
-
-	for (const bot of botOwn) {
-		if (client.users.fetch !== undefined) {
-			const botFetch = await client.users.fetch(bot.botID);
-
-			bots.push(botFetch.id);
-		} else if (client.fetchUser !== undefined) {
-			const botFetch = await client.fetchUser(bot.botID);
-
-			bots.push(botFetch.id);
-		} else throw new Error("This library for authorize client is not yet a supported.");
-	}
-
-	if (!bots.includes(client.user.id)) return { unAuthorize: { code: 401 } };
-
-	return {
-		botID: result.botID,
-		ownerID: result.ownerID,
-		prefix: result.prefix,
-		approve: result.approve
-	};
-}
