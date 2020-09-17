@@ -13,7 +13,6 @@ updates:
       - Dezkrazzer
     labels:
       - dependencies
-      - devDependencies
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
@@ -25,6 +24,5 @@ updates:
       - Fabio0107ID
       - Dezkrazzer
     labels:
-      - github-actions
+      - gh-actions
       - dependencies
-      - devDependencies

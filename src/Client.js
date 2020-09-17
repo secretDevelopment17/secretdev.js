@@ -24,8 +24,28 @@ class SecretDevClient extends EventEmitter {
 		 */
 
 		client.on("ready", () => {
-			authorizeClient(client).then(authClient => this.emit("authorize", authClient));
+			this.authorizeClient(client).then(authClient => this.emit("authorize", authClient)).catch(e => this.emit("error", e));
 		});
+	}
+
+	/**
+	 * Authorization client for catch include data
+	 * @private
+	 * @return {Promise<object>}
+	 */
+	async authorizeClient() {
+		const { body } = await request.post(
+			"https://api.secretdev.tech/api/authorize/client"
+		).set("authorizeclient", this.client.user.id);
+
+		const result = {
+			botID: body.botID,
+			ownerID: body.ownerID,
+			prefix: body.prefix,
+			approve: body.approve
+		};
+
+		return result;
 	}
 
 	/**
@@ -38,7 +58,9 @@ class SecretDevClient extends EventEmitter {
 		if (!id || isNaN(id)) id = this.client.user.id;
 
 		try {
-			const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
+			const { body } = await request.get(
+				`https://api.secretdev.tech/api/bots/${id}`
+			).set("authorizeclient", this.client.user.id);
 
 			const result = {
 				botID: body.botID,
@@ -67,7 +89,9 @@ class SecretDevClient extends EventEmitter {
 
 		if (blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
 
-		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
+		const { body } = await request.get(
+			"https://api.secretdev.tech/api/botsArray"
+		).set("authorizeclient", this.client.user.id);
 
 		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
 			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
@@ -111,7 +135,9 @@ class SecretDevClient extends EventEmitter {
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
 
-		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
+		const { body: botsArray } = await request.get(
+			"https://api.secretdev.tech/api/botsArray"
+		).set("authorizeclient", this.client.user.id);
 
 		if (this.client.users.fetch !== undefined) {
 			const user = await this.client.users.fetch(id);
@@ -166,23 +192,3 @@ class SecretDevClient extends EventEmitter {
 }
 
 module.exports = SecretDevClient;
-
-/**
- * Authorization client for catch include data
- * @param {any} client This client package provide
- * @return {Promise<object>}
- */
-async function authorizeClient(client) {
-	const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
-
-	const result = body.filter(bot => bot.botID.includes(client.user.id))[0];
-
-	if (result === undefined) throw new Error(
-		"[secretdev.js] Warning: this client is not Registered, please register and approve now!"
-	);
-	else if (result.approve !== undefined && !result.approve) throw new Error(
-			"[secretdev.js] Warning: this client is not Approve, please patient the Approve this client."
-		);
-
-	return result;
-}
