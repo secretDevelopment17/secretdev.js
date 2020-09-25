@@ -2,6 +2,9 @@
 
 const request = require("node-superfetch");
 
+/**
+ * @class SecretDevClient
+ */
 class SecretDevClient {
 	/**
    * Create a new Api Wrapper instance.
@@ -21,8 +24,11 @@ class SecretDevClient {
 	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
+		const blockType = ["boolean", "object"];
+
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
-		if (!id || isNaN(id)) id = this.client.user.id;
+		else if (!id || isNaN(id)) id = this.client.user.id;
+		else if (blockType.includes(typeof id)) throw new Error("[getUser] Type for structures is not allowed");
 
 		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
 
@@ -39,30 +45,31 @@ class SecretDevClient {
 	async botsArray(obj) {
 		const blockType = ["number", "string", "boolean"];
 
-		if (blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
+		if (!obj || blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
 
 		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
 		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
-			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
-			else if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix Bots.");
+			const blockTypeOwner = ["boolean", "object"];
+
+			if (blockTypeOwner.includes(obj.ownerID)) throw new Error("[botsArray] Type for structures is not allowed");
 
 			const bots = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
 
 			return bots;
 		} else if (obj.ownerID !== undefined) {
-			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
+			const blockTypeOwner = ["boolean", "object"];
+
+			if (blockTypeOwner.includes(obj.ownerID)) throw new Error("[botsArray] Type for structures is not allowed");
 
 			const bots = body.filter(x => x.ownerID.includes(obj.ownerID));
 
 			return bots;
 		} else if (obj.prefix !== undefined) {
-			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
-
 			const bots = body.filter(x => x.prefix.includes(obj.prefix));
 
 			return bots;
-		} else throw new Error("[botsArray] Invalid a Object Structures.");
+		} else throw new Error("[botsArray] Invalid a object structures.");
 	}
 
 	/**
@@ -71,7 +78,10 @@ class SecretDevClient {
    * @return {Promise<object>}
 	 */
 	async getUser(id) {
+		const blockType = ["boolean", "object"];
+
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
+		else if (blockType.includes(typeof id)) throw new Error("[getUser] Type for structures is not allowed");
 
 		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
 
@@ -90,9 +100,9 @@ class SecretDevClient {
 				createdAt: new Date(user.createdTimestamp).toString(),
 				createdTimestamp: user.createdTimestamp,
 				avatar: {
-					sd: { uri: user.displayAvatarURL({ dynamic: true, size: 512 }) },
-					hd: { uri: user.displayAvatarURL({ dynamic: true, size: 1024 }) },
-					fhd: { uri: user.displayAvatarURL({ dynamic: true, size: 2048 }) }
+					sd: user.displayAvatarURL({ dynamic: true, size: 512 }),
+					hd: user.displayAvatarURL({ dynamic: true, size: 1024 }),
+					fhd: user.displayAvatarURL({ dynamic: true, size: 2048 })
 				},
 				bot: user.bot
 			};
@@ -123,7 +133,7 @@ class SecretDevClient {
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
 
 			return body;
-		} else throw new Error("[getUser] this library for fetchUser is not yet a supported.");
+		} else throw new Error("[getUser] this library for getUser is not yet a supported.");
 	}
 }
 
