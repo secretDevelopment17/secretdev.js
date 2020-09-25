@@ -1,31 +1,18 @@
 "use strict";
 
 const request = require("node-superfetch");
-const EventEmitter = require("events");
 
-class SecretDevClient extends EventEmitter {
+class SecretDevClient {
 	/**
    * Create a new Api Wrapper instance.
    * @param {any} [client] You client instance for package discord
 	 */
 	constructor(client) {
-		super();
-
 		const blockedTypeof = ["number", "string", "boolean"];
 
 		if (blockedTypeof.includes(typeof client)) throw new Error("Please provide for client packages.");
 		
 		this.client = client;
-
-		/**
-		 * Authorization client with event for get notif is has been connect to api wrapper
-		 * @event authorize
-		 * @param {?Object} authClient this a api bots get authorize
-		 */
-
-		client.on("ready", () => {
-			this.authorizeClient(client).then(authClient => this.emit("authorize", authClient)).catch(e => this.emit("error", e));
-		});
 	}
 
 	/**
@@ -39,18 +26,7 @@ class SecretDevClient extends EventEmitter {
 
 		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
 
-		if (body.error === "not_found") return {
-			error: { message: "This Bot is Not Found", code: 404 }
-		};
-
-		const result = {
-			botID: body.botID,
-			ownerID: body.ownerID,
-			prefix: body.prefix,
-			approve: body.approve
-		};
-
-		return result;
+		return body;
 	}
 
 	/**
@@ -60,7 +36,7 @@ class SecretDevClient extends EventEmitter {
 	 * @param {?String} [obj.prefix] this a when object with same the prefix many bots.
 	 * @return {Promise<object>}
 	 */
-	async botsArray(obj = {}) {
+	async botsArray(obj) {
 		const blockType = ["number", "string", "boolean"];
 
 		if (blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
@@ -73,29 +49,17 @@ class SecretDevClient extends EventEmitter {
 
 			const bots = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
 
-			if (!bots.length) return {
-				error: { message: "This bots array is not found.", code: 404 }
-			};
-
 			return bots;
 		} else if (obj.ownerID !== undefined) {
 			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
 
 			const bots = body.filter(x => x.ownerID.includes(obj.ownerID));
 
-			if (!bots.length) return {
-				error: { message: "This bots array is not found.", code: 404 }
-			};
-
 			return bots;
 		} else if (obj.prefix !== undefined) {
 			if (!obj.prefix) throw new Error("[botsArray] No provide someone for prefix bots.");
 
 			const bots = body.filter(x => x.prefix.includes(obj.prefix));
-
-			if (!bots.length) return {
-				error: { message: "This bots array is not found.", code: 404 }
-			};
 
 			return bots;
 		} else throw new Error("[botsArray] Invalid a Object Structures.");
