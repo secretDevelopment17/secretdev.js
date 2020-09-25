@@ -29,14 +29,19 @@ class SecretDevClient extends EventEmitter {
 	}
 
 	/**
-	 * Authorization client for catch include data
-	 * @private
+	 * Get information about a bot with jsons.
+	 * @param {?String} id This ID of the bot you want to get the informations
 	 * @return {Promise<object>}
 	 */
-	async authorizeClient() {
-		const { body } = await request.post(
-			"https://api.secretdev.tech/api/authorize/client"
-		).set("authorizeclient", this.client.user.id);
+	async getBot(id) {
+		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
+		if (!id || isNaN(id)) id = this.client.user.id;
+
+		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
+
+		if (body.error === "not_found") return {
+			error: { message: "This Bot is Not Found", code: 404 }
+		};
 
 		const result = {
 			botID: body.botID,
@@ -46,35 +51,6 @@ class SecretDevClient extends EventEmitter {
 		};
 
 		return result;
-	}
-
-	/**
-	 * Get information about a bot with jsons.
-	 * @param {?String} id This ID of the bot you want to get the informations
-	 * @return {Promise<object>}
-	 */
-	async getBot(id) {
-		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
-		if (!id || isNaN(id)) id = this.client.user.id;
-
-		try {
-			const { body } = await request.get(
-				`https://api.secretdev.tech/api/bots/${id}`
-			).set("authorizeclient", this.client.user.id);
-
-			const result = {
-				botID: body.botID,
-				ownerID: body.ownerID,
-				prefix: body.prefix,
-				approve: body.approve
-			};
-
-			return result;
-		} catch (e) {
-			return {
-				error: { message: "This Bot is Not Found", code: 404 }
-			};
-		}
 	}
 
 	/**
@@ -89,9 +65,7 @@ class SecretDevClient extends EventEmitter {
 
 		if (blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
 
-		const { body } = await request.get(
-			"https://api.secretdev.tech/api/botsArray"
-		).set("authorizeclient", this.client.user.id);
+		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
 		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
 			if (!obj.ownerID || isNaN(obj.ownerID)) throw new Error("[botsArray] No provide someone for developer IDs.");
@@ -135,9 +109,7 @@ class SecretDevClient extends EventEmitter {
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
 
-		const { body: botsArray } = await request.get(
-			"https://api.secretdev.tech/api/botsArray"
-		).set("authorizeclient", this.client.user.id);
+		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
 
 		if (this.client.users.fetch !== undefined) {
 			const user = await this.client.users.fetch(id);
