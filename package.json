@@ -1,6 +1,6 @@
 {
-  "name": "@secretDevelopment17/secretdev.js",
-  "version": "1.0.6-dev",
+  "name": "secretdev.js",
+  "version": "1.0.7",
   "description": "Simple Api Wrapper for Secret Development with Bot List, and writtin language with JavaScript",
   "main": "index",
   "scripts": {
@@ -38,8 +38,5 @@
   },
   "devDependencies": {
     "eslint": "^7.7.0"
-  },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
   }
 }
