@@ -1,4 +1,6 @@
+"use strict";
+
 module.exports = {
-	version: require("./package.json").version,
-	Client: require("./src/Client")
+	Client: require("./src/Client"),
+	version: require("./package.json")
 }

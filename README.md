@@ -6,12 +6,12 @@ An Official module for interacting with the API
 
 # with Node Package Manager ( NPM )
 ```bash
-$ npm i @secretDevelopment17/secretdev.js --save
+$ npm i secretdev.js --save
 ```
 
 # with Yarn
 ```bash
-$ yarn add @secretDevelopment17/secretdev.js
+$ yarn add secretdev.js
 ```
 
 ## Example

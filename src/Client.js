@@ -3,9 +3,10 @@
 const request = require("node-superfetch");
 
 /**
- * @class SecretDevClient
+ * Rest API with npm instance registry
+ * @class secretDevClient
  */
-class SecretDevClient {
+class secretDevClient {
 	/**
    * Create a new Api Wrapper instance.
    * @param {any} [client] You client instance for package discord
@@ -18,13 +19,13 @@ class SecretDevClient {
 
 	/**
 	 * Get information about a bot with jsons.
-	 * @param {?String} id This ID of the bot you want to get the informations
+	 * @param {String} id This ID of the bot you want to get the informations
 	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
 		else if (!id || isNaN(id)) id = this.client.user.id;
-		else if (typeof id !== "string") throw new Error("[getUser] Type for structures is not allowed");
+		else if (typeof id !== "string") throw new Error("[getBot] Typeof for getBot is only a string.");
 
 		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
 
@@ -33,47 +34,46 @@ class SecretDevClient {
 
 	/**
 	 * Get Array in object find the api
-	 * @param {Object} obj this a when object the find
-	 * @param {?String} [obj.ownerID] this a when object with owner developer
-	 * @param {?String} [obj.prefix] this a when object with same the prefix many bots.
+	 * @param {Object} options this a when object the find
+	 * @param {String} [options.ownerID] this a when object with owner developer
+	 * @param {String} [options.prefix] this a when object with same the prefix many bots.
 	 * @return {Promise<object>}
 	 */
-	async botsArray(obj) {
-		if (!obj || typeof obj !== "object") throw new Error("[botsArray] No provide some with object structures.");
+	async botsArray(options = {}) {
+		if (!options) throw new Error("[botsArray] No provide someone for object.");
+		if (typeof options !== "object") throw new Error("[botsArray] Typeof for botsArray is only a object.");
 
 		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
-		if (obj.ownerID !== undefined && obj.prefix !== undefined) {
-			const blockTypeOwner = ["boolean", "object"];
+		if (options.ownerID !== undefined && options.prefix !== undefined) {
+			if (typeof options.prefix !== "string") throw new Error("[botsArray] Typeof for botsArray for prefix is only a string.");
 
-			if (blockTypeOwner.includes(obj.ownerID)) throw new Error("[botsArray] Type for structures is not allowed");
-
-			const bots = body.filter(x => x.ownerID.includes(obj.ownerID) && x.prefix.includes(obj.prefix));
+			const bots = body.filter(x => x.ownerID.includes(options.ownerID) && x.prefix.includes(options.prefix));
 
 			return bots;
-		} else if (obj.ownerID !== undefined) {
-			const blockTypeOwner = ["boolean", "object"];
+		} else if (options.ownerID !== undefined) {
+			if (typeof options.ownerID !== "string") throw new Error("[botsArray] Typeof for botsArray for ownerID is only a string.");
 
-			if (blockTypeOwner.includes(obj.ownerID)) throw new Error("[botsArray] Type for structures is not allowed");
-
-			const bots = body.filter(x => x.ownerID.includes(obj.ownerID));
+			const bots = body.filter(x => x.ownerID.includes(options.ownerID));
 
 			return bots;
-		} else if (obj.prefix !== undefined) {
-			const bots = body.filter(x => x.prefix.includes(obj.prefix));
+		} else if (options.prefix !== undefined) {
+			if (typeof options.prefix !== "string") throw new Error("[botsArray] Typeof for botsArray for prefix is only a string.");
+
+			const bots = body.filter(x => x.prefix.includes(options.prefix));
 
 			return bots;
-		} else throw new Error("[botsArray] Invalid a object structures.");
+		} else return undefined;
 	}
 
 	/**
    * Get fetchUser api with discord api of client
-   * @param {?String} id This ID of users on discord ID
+   * @param {String} id This ID of users on discord ID
    * @return {Promise<object>}
 	 */
 	async getUser(id) {
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
-		else if (typeof id !== "string") throw new Error("[getUser] Type for structures is not allowed");
+		else if (typeof id !== "string") throw new Error("[getUser] Typeof for getUser is only a string.");
 
 		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
 
@@ -125,8 +125,8 @@ class SecretDevClient {
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
 
 			return body;
-		} else throw new Error("[getUser] this library for getUser is not yet a supported.");
+		} else return undefined;
 	}
 }
 
-module.exports = SecretDevClient;
+module.exports = secretDevClient;

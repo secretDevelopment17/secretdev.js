@@ -1,8 +1,9 @@
 {
   "name": "secretdev.js",
-  "version": "1.0.7",
-  "description": "Simple Api Wrapper for Secret Development with Bot List, and writtin language with JavaScript",
-  "main": "index",
+  "version": "1.0.8-dev",
+  "description": "Simple Api Wrapper for Secret Development with Bot List, and writtin language with TypeScript",
+  "main": "index.js",
+  "typings": "index.d.ts",
   "scripts": {
     "test": "eslint --ignore-path .gitignore \"src/**/*.+(js)\"",
     "test:fix": "eslint --ignore-path .gitignore \"src/**/*.+(js)\" --fix"
@@ -12,14 +13,14 @@
     "url": "git+https://github.com/secretDevelopment17/secretdev.js.git"
   },
   "keywords": [
-    "JavaScript",
-    "SecretDev",
-    "Wrapper",
+    "nodejs",
+    "secretDev",
     "Api",
-    "Rest-Api",
-    "Application"
+    "Wrapper",
+    "Rest-API",
+    "JavaScript"
   ],
-  "author": "fabio0107id",
+  "author": "secretdevelopment, fabio0107id",
   "license": "AGPL-3.0",
   "bugs": {
     "url": "https://github.com/secretDevelopment17/secretdev.js/issues"
@@ -37,6 +38,6 @@
     "node-superfetch": "^0.1.10"
   },
   "devDependencies": {
-    "eslint": "^7.7.0"
+    "eslint": "^7.10.0"
   }
 }
