@@ -11,9 +11,7 @@ class SecretDevClient {
    * @param {any} [client] You client instance for package discord
 	 */
 	constructor(client) {
-		const blockedTypeof = ["number", "string", "boolean"];
-
-		if (blockedTypeof.includes(typeof client)) throw new Error("Please provide for client packages.");
+		if (typeof client !== "object") throw new Error("Please provide for client packages.");
 		
 		this.client = client;
 	}
@@ -24,11 +22,9 @@ class SecretDevClient {
 	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
-		const blockType = ["boolean", "object"];
-
 		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
 		else if (!id || isNaN(id)) id = this.client.user.id;
-		else if (blockType.includes(typeof id)) throw new Error("[getUser] Type for structures is not allowed");
+		else if (typeof id !== "string") throw new Error("[getUser] Type for structures is not allowed");
 
 		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
 
@@ -43,9 +39,7 @@ class SecretDevClient {
 	 * @return {Promise<object>}
 	 */
 	async botsArray(obj) {
-		const blockType = ["number", "string", "boolean"];
-
-		if (!obj || blockType.includes(typeof obj)) throw new Error("[botsArray] No provide some with object structures.");
+		if (!obj || typeof obj !== "object") throw new Error("[botsArray] No provide some with object structures.");
 
 		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
@@ -78,10 +72,8 @@ class SecretDevClient {
    * @return {Promise<object>}
 	 */
 	async getUser(id) {
-		const blockType = ["boolean", "object"];
-
 		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
-		else if (blockType.includes(typeof id)) throw new Error("[getUser] Type for structures is not allowed");
+		else if (typeof id !== "string") throw new Error("[getUser] Type for structures is not allowed");
 
 		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
 
