@@ -2,7 +2,7 @@ export declare class secretDevClient {
 	constructor(client: object);
 
 	public getBot(id: string): Promise<secretDevClient.Bot>;
-	public botsArray(options: secretDevClient.BotQuery): Promise<secretDevClient.Bot[]>;
+	public botsArray(options: secretDevClient.BotArrayOption): Promise<secretDevClient.Bot[]>;
 	public getUser(id: string): Promise<secretDevClient.User>;
 }
 
@@ -14,7 +14,7 @@ declare namespace secretDevClient {
 		approve: boolean;
 	};
 
-	export type BotQuery = {
+	export type BotArrayOption = {
 		ownerID?: string;
 		prefix?: string;
 	}

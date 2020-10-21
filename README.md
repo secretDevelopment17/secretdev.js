@@ -18,7 +18,7 @@ $ yarn add secretDevelopment17/secretdev.js
 # Example for async/await
 ```js
 const { Client } = require("discord.js");
-const { Client: secretDevClient } = require("@secretDevelopment17/secretdev.js");
+const { Client: secretDevClient } = require("secretdev.js");
 
 const client = new Client({ disableMentions: true });
 const secretDev = new secretDevClient(client);
@@ -53,7 +53,7 @@ client.login("token here");
 # Example for then()/promise
 ```js
 const { Client } = require("discord.js");
-const { Client: secretDevClient } = require("@secretDevelopment17/secretdev.js");
+const { Client: secretDevClient } = require("secretdev.js");
 
 const client = new Client({ disableMentions: true });
 const secretDev = new secretDevClient(client);

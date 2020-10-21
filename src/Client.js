@@ -103,9 +103,9 @@ class secretDevClient {
 				bot: user.bot
 			};
 
-			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
+			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID.includes(user.id));
 			else {
-				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const ownerResult = botsArray.filter(x => x.botID.includes(user.id))[0].ownerID;
 				const botOwn = await this.client.users.fetch(ownerResult);
 
 				body.ownedBy = {
@@ -121,7 +121,7 @@ class secretDevClient {
 						fhd: botOwn.displayAvatarURL({ dynamic: true, size: 2048 })
 					},
 					bot: botOwn.bot,
-					bots: botsArray.filter(x => x.ownerID === botOwn.id) || []
+					bots: botsArray.filter(x => x.ownerID.includes(botOwn.id))
 				};
 			}
 
@@ -146,9 +146,9 @@ class secretDevClient {
 				bot: user.bot
 			};
 
-			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
+			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID.includes(user.id));
 			else {
-				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const ownerResult = botsArray.filter(x => x.botID.includes(user.id))[0].ownerID;
 				const botOwn = await this.client.fetchUser(ownerResult);
 
 				body.ownedBy = {
@@ -162,7 +162,7 @@ class secretDevClient {
 					avatarURL: botOwn.avatarURL,
 					displayAvatarURL: botOwn.displayAvatarURL,
 					bot: botOwn.bot,
-					bots: botsArray.filter(x => x.ownerID === botOwn.id) || []
+					bots: botsArray.filter(x => x.ownerID.includes(botOwn.id))
 				};
 			}
 
