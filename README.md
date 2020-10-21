@@ -35,12 +35,11 @@ client.on("message", async message => {
 
 	if (command === "botinfo") {
 		try {
-			const body = await secretDev.getBot(args[0] || client.user.id);
+			const body = await secretDev.getBot(args[0]);
 			const botUser = await secretDev.getUser(body.botID);
-			const user = await secretDev.getUser(body.ownerID);
 
 			return message.channel.send(
-				`**${botUser.tag}** by \`${user.tag}\` with prefixes: **\`${body.prefix}\`**.`
+				`**${botUser.tag}** by \`${botUser.ownedBy.tag}\` with prefixes: **\`${body.prefix}\`**.`
 			);
 		} catch (e) {
 			return message.channel.send("This bot is not **Registered**!");
@@ -70,13 +69,11 @@ client.on("message", message => {
 	const command = args.shift().toLowerCase();
 
 	if (command === "botinfo") {
-		secretDev.getBot(args[0] || client.user.id).then(body => {
+		secretDev.getBot(args[0]).then(body => {
 			secretDev.getUser(body.botID).then(botUser => {
-				secretDev.getUser(body.ownerID).then(user => {
-					return message.channel.send(
-						`**${botUser.tag}** by \`${user.tag}\` with prefixes: **\`${body.prefix}\`**.`
-					);
-				});
+				return message.channel.send(
+					`**${botUser.tag}** by \`${botUser.ownedBy.tag}\` with prefixes: **\`${body.prefix}\`**.`
+				);
 			});
 		}).catch(e => message.channel.send("This bot is not **Registered**!"));
 	}
