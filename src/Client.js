@@ -105,8 +105,8 @@ class secretDevClient {
 
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
 			else {
-				const ownerResult = botsArray.filter(x => x.botID === user.id)[0];
-				const botOwn = await this.client.users.fetch(ownerResult.ownerID);
+				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const botOwn = await this.client.users.fetch(ownerResult);
 
 				body.ownedBy = {
 					id: botOwn.id,
@@ -148,8 +148,8 @@ class secretDevClient {
 
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
 			else {
-				const ownerResult = botsArray.filter(x => x.botID === user.id)[0];
-				const botOwn = await this.client.fetchUser(ownerResult.ownerID);
+				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const botOwn = await this.client.fetchUser(ownerResult);
 
 				body.ownedBy = {
 					id: botOwn.id,
