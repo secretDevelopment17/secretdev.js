@@ -12,7 +12,8 @@ class secretDevClient {
    * @param {any} [client] You client instance for package discord
 	 */
 	constructor(client) {
-		if (typeof client !== "object") throw new Error("Please provide for client packages.");
+		if (!client || client === undefined) throw new Error("[secretdev.js] No provide someone for client instance.");
+		if (typeof client !== "object") throw new Error("[secretdev.js] Typeof for client instance is only a object.");
 		
 		this.client = client;
 	}
@@ -23,8 +24,8 @@ class secretDevClient {
 	 * @return {Promise<object>}
 	 */
 	async getBot(id) {
-		if (!id && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
-		else if (!id || isNaN(id)) id = this.client.user.id;
+		if ((!id || id === undefined) && !this.client) throw new Error("[getBot] No provide someone for bot IDs.");
+		else if ((!id || id === undefined) || isNaN(id)) id = this.client.user.id;
 		else if (typeof id !== "string") throw new Error("[getBot] Typeof for getBot is only a string.");
 
 		const { body } = await request.get(`https://api.secretdev.tech/api/bots/${id}`);
@@ -40,19 +41,21 @@ class secretDevClient {
 	 * @return {Promise<object>}
 	 */
 	async botsArray(options = {}) {
-		if (!options) throw new Error("[botsArray] No provide someone for object.");
+		if (!options || options === undefined) throw new Error("[botsArray] No provide someone for object options.");
 		if (typeof options !== "object") throw new Error("[botsArray] Typeof for botsArray is only a object.");
 
 		const { body } = await request.get("https://api.secretdev.tech/api/botsArray");
 
 		if (options.ownerID !== undefined && options.prefix !== undefined) {
 			if (typeof options.prefix !== "string") throw new Error("[botsArray] Typeof for botsArray for prefix is only a string.");
+			else if (isNaN(options.ownerID)) throw new Error("[getUser] botsArray for ownerID is only a number of string.");
 
 			const bots = body.filter(x => x.ownerID.includes(options.ownerID) && x.prefix.includes(options.prefix));
 
 			return bots;
 		} else if (options.ownerID !== undefined) {
 			if (typeof options.ownerID !== "string") throw new Error("[botsArray] Typeof for botsArray for ownerID is only a string.");
+			else if (isNaN(options.ownerID)) throw new Error("[getUser] botsArray for ownerID is only a number of string.");
 
 			const bots = body.filter(x => x.ownerID.includes(options.ownerID));
 
@@ -72,8 +75,9 @@ class secretDevClient {
    * @return {Promise<object>}
 	 */
 	async getUser(id) {
-		if (!id || isNaN(id)) throw new Error("[getUser] No provide someone for discord IDs.");
+		if ((!id || id === undefined)) throw new Error("[getUser] No provide someone for IDs.");
 		else if (typeof id !== "string") throw new Error("[getUser] Typeof for getUser is only a string.");
+		else if (isNaN(id)) throw new Error("[getUser] getUser is only a number of string.");
 
 		const { body: botsArray } = await request.get("https://api.secretdev.tech/api/botsArray");
 
@@ -100,6 +104,26 @@ class secretDevClient {
 			};
 
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
+			else {
+				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const botOwn = await this.client.users.fetch(ownerResult);
+
+				body.ownedBy = {
+					id: botOwn.id,
+					discriminator: botOwn.discriminator,
+					tag: botOwn.tag,
+					username: botOwn.username,
+					createdAt: new Date(botOwn.createdTimestamp).toString(),
+					createdTimestamp: botOwn.createdTimestamp,
+					avatar: {
+						sd: botOwn.displayAvatarURL({ dynamic: true, size: 512 }),
+						hd: botOwn.displayAvatarURL({ dynamic: true, size: 1024 }),
+						fhd: botOwn.displayAvatarURL({ dynamic: true, size: 2048 })
+					},
+					bot: botOwn.bot,
+					bots: botsArray.filter(x => x.ownerID === botOwn.id) || []
+				};
+			}
 
 			return body;
 		} else if (this.client.fetchUser !== undefined) {
@@ -123,6 +147,24 @@ class secretDevClient {
 			};
 
 			if (!user.bot) body.bots = botsArray.filter(x => x.ownerID === user.id) || [];
+			else {
+				const ownerResult = botsArray.filter(x => x.botID === user.id)[0].ownerID;
+				const botOwn = await this.client.fetchUser(ownerResult);
+
+				body.ownedBy = {
+					id: botOwn.id,
+					discriminator: botOwn.discriminator,
+					tag: botOwn.tag,
+					username: botOwn.username,
+					createdAt: new Date(botOwn.createdTimestamp).toString(),
+					createdTimestamp: botOwn.createdTimestamp,
+					avatar: botOwn.avatar,
+					avatarURL: botOwn.avatarURL,
+					displayAvatarURL: botOwn.displayAvatarURL,
+					bot: botOwn.bot,
+					bots: botsArray.filter(x => x.ownerID === botOwn.id) || []
+				};
+			}
 
 			return body;
 		} else return undefined;

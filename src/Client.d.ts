@@ -1,9 +1,9 @@
 export declare class secretDevClient {
-	constructor(client?: object);
+	constructor(client: object);
 
-	public getBot(id?: string): Promise<secretDevClient.Bot>;
+	public getBot(id: string): Promise<secretDevClient.Bot>;
 	public botsArray(options: secretDevClient.BotQuery): Promise<secretDevClient.Bot[]>;
-	public getUser(id?: string): Promise<secretDevClient.User>;
+	public getUser(id: string): Promise<secretDevClient.User>;
 }
 
 declare namespace secretDevClient {
@@ -30,6 +30,19 @@ declare namespace secretDevClient {
 		avatarURL?: string;
 		displayAvatarURL?: string;
 		bot: boolean;
+		ownedBy?: {
+			id?: string;
+			discriminator?: string;
+			tag?: string;
+			username?: string;
+			createdAt?: Date;
+			createdTimestamp?: Date;
+			avatar?: object | string;
+			avatarURL?: string;
+			displayAvatarURL?: string;
+			bot: boolean;
+			bots?: Bot[];
+		};
 		bots?: Bot[];
 	}
 }

@@ -1,7 +1,7 @@
 {
   "name": "secretdev.js",
   "version": "1.1.0",
-  "description": "Simple Api Wrapper for Secret Development with Bot List, and writtin language with TypeScript",
+  "description": "Simple Api Wrapper for Secret Development with Bot List, and writtin language with JavaScript",
   "main": "index.js",
   "typings": "index.d.ts",
   "scripts": {
