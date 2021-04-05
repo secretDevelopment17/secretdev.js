@@ -35,7 +35,7 @@
     "node": ">=12.0.0"
   },
   "dependencies": {
-    "node-superfetch": "^0.1.10"
+    "node-superfetch": "^0.2.2"
   },
   "devDependencies": {
     "eslint": "^7.10.0"
