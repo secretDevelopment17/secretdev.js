@@ -38,6 +38,6 @@
     "node-superfetch": "^0.1.10"
   },
   "devDependencies": {
-    "eslint": "^7.10.0"
+    "eslint": "^8.11.0"
   }
 }
